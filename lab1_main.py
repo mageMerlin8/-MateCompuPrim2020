@@ -6,7 +6,7 @@ x2 = [i * 1000 for i in x1]
 x3 = [1, 2, 3, 4, 5000]
 
 # ------------  PRUEBAS  ----------#
-|
+
 # prueba softmax 1 esta 
 # prueba truena, comentala para que corran las demás
 # print('--------Sofmax 1----------')
