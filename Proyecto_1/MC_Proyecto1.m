@@ -80,24 +80,24 @@ col(25,26)=1;
 col(27,30)=1;
 col(28,30)=1;
 
-%A continuacion se va a hacer la suma de la triangular superior y su
+%A continuación se va a hacer la suma de la triangular superior y su
 %transpuesta
 colindancias = col+ transpose(col);
 
 
 %Para contar cuantos estados colindan con un estado, vamos a hacer un
-%vector de 31 en donde se introduciran la cantidad de estados colindantes
+%vector de 32 en donde se introducirán la cantidad de estados colindantes
 
 numcol = (sum(colindancias,2));
 
-%Para el vector de poblacion vamos a traer la infomracion de un archivo de
+%Para el vector de población vamos a traer la información de un archivo de
 %Excel
 poblacion = readtable('DatosExcel.xlsx','Range','D6:D38');
-poblacion = table2array(poblacion);   %Para conertir una tabla en arreglo
+poblacion = table2array(poblacion);   %Para convertir una tabla en arreglo
 
 
 %En el caso 1 el conjunto I es: I1 = {CDMX,Morelos, Chiapas,Nuevo Leon }
-%En terminos de M eso corresponde a {M9,M17,M7,M19}
+%En términos de M eso corresponde a {M9,M17,M7,M19}
 I = [9, 17, 7, 19];
 
 % creamos el vector que tiene las probabilidades de los afectados
@@ -120,9 +120,9 @@ end
 %de esta matriz le tenemos que quitar las columnas y renglones de los
 %estados afectados
 
-%notemos que para quitar el estado i, habiendo quitado j antes, tenemos que
+%notemos que para quitar el estado i, habiendo quitado j estados antes, tenemos que
 %usar A(i-j,:) = []; A(:,i-j)=[];
-% en este caso el estado i tiene indice I(i) y se han quitado (i-1) al
+% en este caso el estado i tiene índice I(i) y se han quitado (i-1) al
 % momento de quitar el I(i)
 
 Is = sort(I);
@@ -132,7 +132,7 @@ for i = 1:length(I)
 end
 
 %El vector b (para resolver el sistema Ax=b) tiene en b(i) la suma de los
-%porcentajes de la poblacion que tuvo la enfermedad en el periodo inicial 
+%porcentajes de la población que tuvo la enfermedad en el periodo inicial 
 %en cada uno de los estados vecinos. 
 
 b = colindancias*p; 
@@ -141,34 +141,37 @@ for i = 1:length(I)
     b(Is(i) - (i-1)) = []; 
 end
 
-%Resolver el sistema Aw=b 
-% en la parte de teoria del reporte demostramos que A es una matriz
+%Resolvemos el sistema Aw=b 
+% en apéndice 2 del reporte demostramos que A es una matriz
 % simétrica positiva definida, por lo que podemos usar la factorización de Cholesky
+
 w = ResuelveCholesky(A, b);
 
-%Para poder tener en un vector el indice epidemologico de los 32 estados,
+%Para poder tener en un vector el índice epidemiológico de los 32 estados,
 %crearemos un vector de 32 renglones donde insertaremos los respectivos
-%indices
+%índices
 
 indices = zeros(length(colindancias),1);
 
-% el manejo extraño de indices es para saltarse a las posiciones infectadas
-% del vector w y asignarles su porcentaje de 
+% el manejo "extraño" de índices es para saltarse a las posiciones de estados infectados
+% del vector w y asignarles su porcentaje de población infectada
 j = 1;
 for i = 1: (length(colindancias) - length(I))
-    while( j < length(I)+1 && i+(j-1) == Is(j))
+    % este while nos sirve para saltarnos los índices de los estados infectados
+    while( j <= length(I) && i+(j-1) == Is(j))
         j = j+1;
     end
     indices(i + (j-1), 1) = w(i); 
 end
 
+%aquí asignamos los índices de los estados infectados
 for i = 1: length(I)
     indices(I(i)) = p(I(i));
 end
 
-%Ahora lo unico que falta es realizar la operacion del indice epidemologico
-%por la poblacion de cada estado. Para ello crearemos un vector de 32 en
-%donde cada elemento de la matriz sea dicha multiplicacion
+%Ahora lo único que falta es realizar la operación del indice epidemiológico
+%por la población de cada estado. Para ello crearemos un vector de 32 en
+%donde cada elemento de la matriz sea dicha multiplicación
 
 probabilidad = poblacion.*indices;
 
@@ -185,8 +188,10 @@ title('Probabilidad de contagio por estado')
 
 
 %En el caso 2 el conjunto I es: I2 = {Yucatan,Tamaulipas, Guanajuato,Zacatecas}
-%En terminos de M eso corresponde a {M31,M28,M11,M32}
+%En términos de M eso corresponde a {M31,M28,M11,M32}
 %Procedemos de la misma forma que en el caso 1
+%A partir de aquí no comentamos el proceso porque los comentarios serían los mismos
+%que los del caso 1
 
 I = [31, 28, 11, 32];
 p = zeros(length(colindancias),1);
@@ -240,19 +245,19 @@ title('Probabilidad de contagio por estado')
 
 
 %En el caso 3 el conjunto I es: I3 = {Ciudad de México, Sonora, Veracruz, Oaxaca}
-%En terminos de M eso corresponde a {M9,M26,M30,M20}
+%En términos de M eso corresponde a {M9,M26,M30,M20}
 %Procedemos de la misma forma que en los casos anteriores
 p = zeros(length(colindancias),1);
 
 I = [9,26,30,20];
 for i = 1: length(I)
-    p(I(i)) = i^3 * 0.000000001; 
+    p(I(i)) = i^2 * 0.000000001; 
 end
 
 p (I(1)) = p(I(1))* 181866;
 p (I(2)) = p(I(2))* 176115;
 p (I(3)) = p(I(3))* 180873;
-p (I(4)) = p(I(4))* (181866 + 176115 + 180873)/3;
+p (I(4)) = p(I(4))* 181143;
 
 A=colindancias*-1;  
 for i = 1:length(A)
